@@ -1,0 +1,66 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+#Cargar dataset
+df = pd.read_excel('D:\Python\Proceso Químico\datos_proceso.xlsx')
+
+#Vista rápida
+print(df.head())
+
+#Asegurar que Tiempo sea datetime
+df['Tiempo'] = pd.to_datetime(df['Tiempo'])
+
+#Visualización Temperatura con respecto al Tiempo
+plt.figure(figsize=(10,5))
+plt.plot(df['Tiempo'], df['Temperatura (°C)'], label='Temperatura')
+plt.xlabel('Tiempo')
+plt.ylabel('Temperatura (°C)')
+plt.title('Temperatura vs Tiempo')
+plt.legend()
+plt.grid()
+plt.show()
+
+#Detección de anomalías en presión
+presion_media = df['Presión (bar)'].mean()
+presion_std = df['Presión (bar)'].std()
+
+df['Presión_Anómala'] = abs(df['Presión (bar)'] - presion_media) > 3 * presion_std
+
+#Detección de anomalías en concentración
+df['Concentración_Anómala'] = df['Concentración (% w/w)'] < 97
+
+#Combinar anomalías
+df['Anomalía'] = df['Presión_Anómala'] | df['Concentración_Anómala']
+
+#Filtrar anomalías encontradas
+anomalías = df[df['Anomalía'] == True]
+
+#Mostrar anomalías
+print(anomalías[['Tiempo', 'Presión (bar)', 'Concentración (% w/w)', 'Anomalía']])
+
+#Mostrar cantidad total de anomalías  
+print(f"🔍 Total de anomalías detectadas: {anomalías.shape[0]}")
+
+#Resaltar anomalías en la gráfica
+plt.figure(figsize=(10,5))
+
+#Gráfica de temperatura normal
+sns.lineplot(data=df, x='Tiempo', y='Temperatura (°C)', label='Temperatura', color='blue')
+
+#Puntos de anomalías
+plt.scatter(anomalías['Tiempo'], anomalías['Temperatura (°C)'], color='red', label='Anomalías', zorder=5)
+
+plt.xlabel('Tiempo')
+plt.ylabel('Temperatura (°C)')
+plt.title('Temperatura vs Tiempo con Anomalías')
+plt.legend()
+plt.grid()
+plt.show()
+
+#Exportar reporte a Excel (2 hojas)
+with pd.ExcelWriter('reporte_analisis_proceso.xlsx', engine='xlsxwriter') as writer:
+    df.to_excel(writer, sheet_name='Datos_Limpios', index=False)
+    anomalías.to_excel(writer, sheet_name='Anomalías', index=False)
+
+print("✅ Reporte generado: 'reporte_analisis_proceso.xlsx'")
