@@ -40,7 +40,7 @@ anomalías = df[df['Anomalía'] == True]
 print(anomalías[['Tiempo', 'Presión (bar)', 'Concentración (% w/w)', 'Anomalía']])
 
 #Mostrar cantidad total de anomalías  
-print(f"🔍 Total de anomalías detectadas: {anomalías.shape[0]}")
+print(f"Total de anomalías detectadas: {anomalías.shape[0]}")
 
 #Resaltar anomalías en la gráfica
 plt.figure(figsize=(10,5))
@@ -63,4 +63,4 @@ with pd.ExcelWriter('reporte_analisis_proceso.xlsx', engine='xlsxwriter') as wri
     df.to_excel(writer, sheet_name='Datos_Limpios', index=False)
     anomalías.to_excel(writer, sheet_name='Anomalías', index=False)
 
-print("✅ Reporte generado: 'reporte_analisis_proceso.xlsx'")
+print("Reporte generado: 'reporte_analisis_proceso.xlsx'")
